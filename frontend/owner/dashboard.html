@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - RentManager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="d-flex">
+    <!-- SIDEBAR -->
+    <div class="sidebar d-flex flex-column" style="width:250px; min-width:250px;">
+        <div class="text-white text-center py-4 px-3 border-bottom border-secondary">
+            <h5 class="fw-bold mb-0"><i class="fas fa-building me-2"></i>RentManager</h5>
+            <small class="opacity-75">Owner Portal</small>
+        </div>
+        <nav class="nav flex-column mt-3 flex-grow-1">
+            <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                <i class="fas fa-tachometer-alt"></i>Dashboard
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('properties')">
+                <i class="fas fa-home"></i>Properties
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('tenants')">
+                <i class="fas fa-users"></i>Tenants
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('payments')">
+                <i class="fas fa-money-bill"></i>Payments
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('maintenance')">
+                <i class="fas fa-tools"></i>Maintenance
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('reports')">
+                <i class="fas fa-chart-bar"></i>Reports
+            </a>
+        </nav>
+        <div class="p-3">
+            <button class="btn btn-outline-light w-100 btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow-1">
+        <!-- TOP NAV -->
+        <nav class="navbar navbar-light bg-white border-bottom px-4">
+            <span class="navbar-brand mb-0 h5" id="page-title">Dashboard</span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted small">Welcome, <strong id="owner-name"></strong></span>
+            </div>
+        </nav>
+
+        <div class="p-4">
+            <div id="alert-container"></div>
+
+            <!-- ===== DASHBOARD SECTION ===== -->
+            <div id="section-dashboard">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card blue">
+                            <h3 id="stat-properties">0</h3>
+                            <p><i class="fas fa-home me-2"></i>Total Properties</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card green">
+                            <h3 id="stat-tenants">0</h3>
+                            <p><i class="fas fa-users me-2"></i>Active Tenants</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card orange">
+                            <h3 id="stat-pending">0</h3>
+                            <p><i class="fas fa-clock me-2"></i>Pending Payments</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card red">
+                            <h3 id="stat-maintenance">0</h3>
+                            <p><i class="fas fa-tools me-2"></i>Maintenance Requests</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Payments -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-money-bill me-2"></i>Recent Payments
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tenant</th>
+                                        <th>Property</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-payments-table">
+                                    <tr><td colspan="5" class="text-center py-3">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Maintenance -->
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="fas fa-tools me-2"></i>Recent Maintenance Requests
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tenant</th>
+                                        <th>Description</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-maintenance-table">
+                                    <tr><td colspan="5" class="text-center py-3">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PROPERTIES SECTION ===== -->
+            <div id="section-properties" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold">My Properties</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPropertyModal">
+                        <i class="fas fa-plus me-2"></i>Add Property
+                    </button>
+                </div>
+                <div class="row g-4" id="properties-list">
+                    <div class="col-12 text-center py-4">Loading...</div>
+                </div>
+            </div>
+
+            <!-- ===== TENANTS SECTION ===== -->
+            <div id="section-tenants" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold">My Tenants</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">
+                        <i class="fas fa-plus me-2"></i>Add Tenant
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Property</th>
+                                        <th>Rent</th>
+                                        <th>Payment Status</th>
+                                        <th>Lease End</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tenants-table">
+                                    <tr><td colspan="7" class="text-center py-3">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAYMENTS SECTION ===== -->
+<div id="section-payments" style="display:none;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold">All Payments</h5>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordPaymentModal">
+            <i class="fas fa-plus me-2"></i>Record Payment
+        </button>
+    </div>
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tenant</th>
+                                        <th>Property</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Payment Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-table">
+                                    <tr><td colspan="5" class="text-center py-3">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MAINTENANCE SECTION ===== -->
+            <div id="section-maintenance" style="display:none;">
+                <h5 class="fw-bold mb-4">Maintenance Requests</h5>
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tenant</th>
+                                        <th>Property</th>
+                                        <th>Description</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="maintenance-table">
+                                    <tr><td colspan="6" class="text-center py-3">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== REPORTS SECTION ===== -->
+            <div id="section-reports" style="display:none;">
+                <h5 class="fw-bold mb-4">Financial Reports</h5>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Total Collected</h6>
+                                <h3 class="text-success fw-bold" id="report-collected">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Total Pending</h6>
+                                <h3 class="text-warning fw-bold" id="report-pending">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Total Overdue</h6>
+                                <h3 class="text-danger fw-bold" id="report-overdue">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>Paid Payments</td>
+                                    <td><span class="badge bg-success" id="report-paid-count">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Pending Payments</td>
+                                    <td><span class="badge bg-warning" id="report-pending-count">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Overdue Payments</td>
+                                    <td><span class="badge bg-danger" id="report-overdue-count">0</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ADD PROPERTY MODAL -->
+<div class="modal fade" id="addPropertyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Property</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-alert"></div>
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <input type="text" class="form-control" id="prop-address" placeholder="e.g. 45 Kampala Road">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Unit Number</label>
+                    <input type="text" class="form-control" id="prop-unit" placeholder="e.g. Unit 3A">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Monthly Rent (UGX)</label>
+                    <input type="number" class="form-control" id="prop-rent" placeholder="e.g. 850000">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Rent Due Day (1-31)</label>
+                    <input type="number" class="form-control" id="prop-due" placeholder="e.g. 5" min="1" max="31">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addProperty()">Add Property</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD TENANT MODAL -->
+<div class="modal fade" id="addTenantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Tenant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="tenant-modal-alert"></div>
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="tenant-name" placeholder="Full name">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="tenant-email" placeholder="Email address">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="tenant-phone" placeholder="Phone number">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Temporary Password</label>
+                    <input type="password" class="form-control" id="tenant-password" placeholder="Set a password">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Property</label>
+                    <select class="form-control" id="tenant-property"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Lease Start</label>
+                    <input type="date" class="form-control" id="tenant-lease-start">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Lease End</label>
+                    <input type="date" class="form-control" id="tenant-lease-end">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addTenant()">Add Tenant</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DEACTIVATE TENANT MODAL -->
+<div class="modal fade" id="deactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Remove Tenant
+                </h5>
+                <button type="button" class="btn-close btn-close-white"
+                    data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="deactivate-tenant-id">
+                <p>Are you sure you want to remove <strong id="deactivate-tenant-name"></strong>?</p>
+                <ul class="text-muted small">
+                    <li>Tenant will be marked as inactive</li>
+                    <li>Property will be marked as vacant</li>
+                    <li>Payment history will be preserved</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                    data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger"
+                    onclick="deactivateTenant()">
+                    <i class="fas fa-user-times me-2"></i>Yes, Remove Tenant
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RECORD PAYMENT MODAL -->
+<div class="modal fade" id="recordPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Record Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="payment-modal-alert"></div>
+                <div class="mb-3">
+                    <label class="form-label">Tenant</label>
+                    <select class="form-control" id="payment-tenant" onchange="updatePropertyDropdown()">
+                        <option value="">Select Tenant</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Property</label>
+                    <select class="form-control" id="payment-property">
+                        <option value="">Select Property</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Amount (UGX)</label>
+                    <input type="number" class="form-control" id="payment-amount"
+                        placeholder="e.g. 850000">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" id="payment-status">
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Payment Date</label>
+                    <input type="date" class="form-control" id="payment-date">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="recordPayment()">
+                    Record Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPDATE MAINTENANCE MODAL -->
+<div class="modal fade" id="maintenanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Maintenance Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="maintenance-id">
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" id="maintenance-status">
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Owner Notes</label>
+                    <textarea class="form-control" id="maintenance-notes" rows="3"
+                        placeholder="Add notes for the tenant..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updateMaintenance()">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/api.js"></script>
+<script>
+    // Check auth
+    if (!requireAuth('owner')) { window.location.href = '../login.html?role=owner'; }
+
+    const user = getUser();
+    document.getElementById('owner-name').textContent = user.name;
+
+    // Show/hide sections
+    function showSection(name) {
+        const sections = ['dashboard', 'properties', 'tenants', 'payments', 'maintenance', 'reports'];
+        sections.forEach(s => {
+            document.getElementById('section-' + s).style.display = s === name ? 'block' : 'none';
+        });
+        document.getElementById('page-title').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+        document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+        event.target.closest('.nav-link').classList.add('active');
+
+        if (name === 'properties') loadProperties();
+        if (name === 'tenants') loadTenants();
+        if (name === 'payments') loadPayments();
+        if (name === 'maintenance') loadMaintenance();
+        if (name === 'reports') loadReports();
+    }
+
+    // Load dashboard data
+    async function loadDashboard() {
+        try {
+            const [propsData, tenantsData, paymentsData, maintData] = await Promise.all([
+                ownerAPI.getProperties(),
+                ownerAPI.getTenants(),
+                ownerAPI.getPayments(),
+                ownerAPI.getMaintenance()
+            ]);
+
+            document.getElementById('stat-properties').textContent = propsData.properties.length;
+            document.getElementById('stat-tenants').textContent = tenantsData.tenants.length;
+            document.getElementById('stat-pending').textContent =
+                paymentsData.payments.filter(p => p.status === 'pending').length;
+            document.getElementById('stat-maintenance').textContent =
+                maintData.requests.filter(r => r.status === 'pending').length;
+
+            // Recent payments table
+            const recentPayments = paymentsData.payments.slice(0, 5);
+            document.getElementById('recent-payments-table').innerHTML = recentPayments.map(p => `
+                <tr>
+                    <td>${p.tenant_name}</td>
+                    <td>${p.address} ${p.unit_number}</td>
+                    <td>${formatCurrency(p.amount)}</td>
+                    <td><span class="badge bg-${getStatusBadge(p.status)}">${p.status}</span></td>
+                    <td>${formatDate(p.payment_date)}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="text-center">No payments yet</td></tr>';
+
+            // Recent maintenance table
+            const recentMaint = maintData.requests.slice(0, 5);
+            document.getElementById('recent-maintenance-table').innerHTML = recentMaint.map(r => `
+                <tr>
+                    <td>${r.tenant_name}</td>
+                    <td>${r.description.substring(0, 50)}...</td>
+                    <td><span class="badge bg-${getStatusBadge(r.priority)}">${r.priority}</span></td>
+                    <td><span class="badge bg-${getStatusBadge(r.status)}">${r.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary"
+                            onclick="openMaintenanceModal(${r.id}, '${r.status}')">
+                            Update
+                        </button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="text-center">No requests yet</td></tr>';
+
+        } catch (error) {
+            showAlert('Error loading dashboard: ' + error.message, 'danger');
+        }
+    }
+
+    // Load properties
+    async function loadProperties() {
+        try {
+            const data = await ownerAPI.getProperties();
+            document.getElementById('properties-list').innerHTML = data.properties.map(p => `
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="fw-bold"><i class="fas fa-home me-2 text-primary"></i>${p.address}</h6>
+                            <p class="text-muted mb-1">Unit: ${p.unit_number || 'N/A'}</p>
+                            <p class="text-muted mb-1">Rent: <strong>${formatCurrency(p.rent_amount)}</strong>/month</p>
+                            <p class="text-muted mb-2">Due: Day ${p.due_date} of each month</p>
+                            <span class="badge bg-${p.tenant_count > 0 ? 'success' : 'secondary'}">
+                                ${p.tenant_count > 0 ? p.tenant_count + ' Tenant(s)' : 'Vacant'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || '<div class="col-12 text-center py-4">No properties yet</div>';
+        } catch (error) {
+            showAlert('Error loading properties: ' + error.message, 'danger');
+        }
+    }
+
+    // Load tenants
+    async function loadTenants() {
+        try {
+            const data = await ownerAPI.getTenants();
+            document.getElementById('tenants-table').innerHTML = data.tenants.map(t => `
+                <tr>
+                    <td>${t.name}</td>
+                    <td>${t.email}</td>
+                    <td>${t.phone || 'N/A'}</td>
+                    <td>${t.address} ${t.unit_number}</td>
+                    <td>${formatCurrency(t.rent_amount)}</td>
+                    <td><span class="badge bg-${getStatusBadge(t.last_payment_status || 'pending')}">
+                        ${t.last_payment_status || 'No payments'}
+                    </span></td>
+                    <td>${formatDate(t.lease_end)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger"
+                            onclick="confirmDeactivate(${t.id}, '${t.name}')">
+                            <i class="fas fa-user-times me-1"></i>Remove
+                        </button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="8" class="text-center">No tenants yet</td></tr>';
+        } catch (error) {
+            showAlert('Error loading tenants: ' + error.message, 'danger');
+        }
+    }
+
+    // Load payments
+    async function loadPayments() {
+        try {
+            const data = await ownerAPI.getPayments();
+            document.getElementById('payments-table').innerHTML = data.payments.map(p => `
+                <tr>
+                    <td>${p.tenant_name}</td>
+                    <td>${p.address} ${p.unit_number}</td>
+                    <td>${formatCurrency(p.amount)}</td>
+                    <td><span class="badge bg-${getStatusBadge(p.status)}">${p.status}</span></td>
+                    <td>${formatDate(p.payment_date)}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="text-center">No payments yet</td></tr>';
+        } catch (error) {
+            showAlert('Error loading payments: ' + error.message, 'danger');
+        }
+    }
+
+    // Load maintenance
+    async function loadMaintenance() {
+        try {
+            const data = await ownerAPI.getMaintenance();
+            document.getElementById('maintenance-table').innerHTML = data.requests.map(r => `
+                <tr>
+                    <td>${r.tenant_name}</td>
+                    <td>${r.address} ${r.unit_number}</td>
+                    <td>${r.description.substring(0, 60)}...</td>
+                    <td><span class="badge bg-${getStatusBadge(r.priority)}">${r.priority}</span></td>
+                    <td><span class="badge bg-${getStatusBadge(r.status)}">${r.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary"
+                            onclick="openMaintenanceModal(${r.id}, '${r.status}', '${r.owner_notes || ''}')">
+                            Update
+                        </button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="text-center">No requests yet</td></tr>';
+        } catch (error) {
+            showAlert('Error loading maintenance: ' + error.message, 'danger');
+        }
+    }
+
+    // Load reports
+    async function loadReports() {
+        try {
+            const now = new Date();
+            const data = await ownerAPI.getReports(now.getMonth() + 1, now.getFullYear());
+            const r = data.report;
+            document.getElementById('report-collected').textContent = formatCurrency(r.total_collected || 0);
+            document.getElementById('report-pending').textContent = formatCurrency(r.total_pending || 0);
+            document.getElementById('report-overdue').textContent = formatCurrency(r.total_overdue || 0);
+            document.getElementById('report-paid-count').textContent = r.paid_count || 0;
+            document.getElementById('report-pending-count').textContent = r.pending_count || 0;
+            document.getElementById('report-overdue-count').textContent = r.overdue_count || 0;
+        } catch (error) {
+            showAlert('Error loading reports: ' + error.message, 'danger');
+        }
+    }
+
+    // Add property
+    async function addProperty() {
+        try {
+            const data = {
+                address: document.getElementById('prop-address').value,
+                unit_number: document.getElementById('prop-unit').value,
+                rent_amount: document.getElementById('prop-rent').value,
+                due_date: document.getElementById('prop-due').value
+            };
+            await ownerAPI.addProperty(data);
+            bootstrap.Modal.getInstance(document.getElementById('addPropertyModal')).hide();
+            showAlert('Property added successfully!', 'success');
+            loadProperties();
+        } catch (error) {
+            document.getElementById('modal-alert').innerHTML =
+                `<div class="alert alert-danger">${error.message}</div>`;
+        }
+    }
+
+    // Add tenant - load properties into dropdown
+    document.getElementById('addTenantModal').addEventListener('show.bs.modal', async () => {
+        const data = await ownerAPI.getProperties();
+        document.getElementById('tenant-property').innerHTML = data.properties.map(p =>
+            `<option value="${p.id}">${p.address} - ${p.unit_number}</option>`
+        ).join('');
+    });
+
+    async function addTenant() {
+        try {
+            const data = {
+                name: document.getElementById('tenant-name').value,
+                email: document.getElementById('tenant-email').value,
+                phone: document.getElementById('tenant-phone').value,
+                password: document.getElementById('tenant-password').value,
+                property_id: document.getElementById('tenant-property').value,
+                lease_start: document.getElementById('tenant-lease-start').value,
+                lease_end: document.getElementById('tenant-lease-end').value
+            };
+            await ownerAPI.addTenant(data);
+            bootstrap.Modal.getInstance(document.getElementById('addTenantModal')).hide();
+            showAlert('Tenant added successfully!', 'success');
+            loadTenants();
+        } catch (error) {
+            document.getElementById('tenant-modal-alert').innerHTML =
+                `<div class="alert alert-danger">${error.message}</div>`;
+        }
+    }
+
+    // Open maintenance modal
+    function openMaintenanceModal(id, status, notes = '') {
+        document.getElementById('maintenance-id').value = id;
+        document.getElementById('maintenance-status').value = status;
+        document.getElementById('maintenance-notes').value = notes;
+        new bootstrap.Modal(document.getElementById('maintenanceModal')).show();
+    }
+
+    async function updateMaintenance() {
+        try {
+            const id = document.getElementById('maintenance-id').value;
+            const data = {
+                status: document.getElementById('maintenance-status').value,
+                owner_notes: document.getElementById('maintenance-notes').value
+            };
+            await ownerAPI.updateMaintenance(id, data);
+            bootstrap.Modal.getInstance(document.getElementById('maintenanceModal')).hide();
+            showAlert('Maintenance request updated!', 'success');
+            loadMaintenance();
+        } catch (error) {
+            showAlert('Error: ' + error.message, 'danger');
+        }
+    }
+
+// Confirm deactivate
+function confirmDeactivate(id, name) {
+    document.getElementById('deactivate-tenant-id').value = id;
+    document.getElementById('deactivate-tenant-name').textContent = name;
+    new bootstrap.Modal(document.getElementById('deactivateModal')).show();
+}
+
+// Deactivate tenant
+async function deactivateTenant() {
+    try {
+        const id = document.getElementById('deactivate-tenant-id').value;
+        await ownerAPI.deactivateTenant(id);
+        bootstrap.Modal.getInstance(document.getElementById('deactivateModal')).hide();
+        showAlert('Tenant removed successfully. Property is now vacant!', 'success');
+        loadTenants();
+        loadProperties();
+        loadDashboard();
+    } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
+    }
+}
+
+// Store tenants data globally
+let tenantsData = [];
+
+// Load tenants into payment modal dropdown
+document.getElementById('recordPaymentModal').addEventListener('show.bs.modal', async () => {
+    try {
+        const data = await ownerAPI.getTenants();
+        tenantsData = data.tenants;
+
+        // Remove duplicate tenants by id
+        const unique = [...new Map(data.tenants.map(t => [t.id, t])).values()];
+
+        document.getElementById('payment-tenant').innerHTML =
+            '<option value="">Select Tenant</option>' +
+            unique.map(t => `<option value="${t.id}">${t.name} - ${t.email}</option>`).join('');
+
+        document.getElementById('payment-property').innerHTML =
+            '<option value="">Select Property First</option>';
+
+        // Set today as default payment date
+        document.getElementById('payment-date').value =
+            new Date().toISOString().split('T')[0];
+
+    } catch (error) {
+        document.getElementById('payment-modal-alert').innerHTML =
+            `<div class="alert alert-danger">${error.message}</div>`;
+    }
+});
+
+// Update property dropdown when tenant is selected
+function updatePropertyDropdown() {
+    const tenantId = parseInt(document.getElementById('payment-tenant').value);
+    const tenant = tenantsData.find(t => t.id === tenantId);
+
+    if (tenant) {
+        document.getElementById('payment-property').innerHTML =
+            `<option value="${tenant.property_id}">${tenant.address} - ${tenant.unit_number}</option>`;
+        document.getElementById('payment-amount').value = tenant.rent_amount;
+    } else {
+        document.getElementById('payment-property').innerHTML =
+            '<option value="">Select Tenant First</option>';
+        document.getElementById('payment-amount').value = '';
+    }
+}
+
+// Record payment
+async function recordPayment() {
+    try {
+        const tenantId = document.getElementById('payment-tenant').value;
+        const propertyId = document.getElementById('payment-property').value;
+        const amount = document.getElementById('payment-amount').value;
+        const status = document.getElementById('payment-status').value;
+        const paymentDate = document.getElementById('payment-date').value;
+
+        if (!tenantId || !propertyId || !amount) {
+            document.getElementById('payment-modal-alert').innerHTML =
+                '<div class="alert alert-danger">Please fill in all required fields</div>';
+            return;
+        }
+
+        await ownerAPI.recordPayment({
+            tenant_id: tenantId,
+            property_id: propertyId,
+            amount: amount,
+            status: status,
+            payment_date: paymentDate
+        });
+
+        bootstrap.Modal.getInstance(document.getElementById('recordPaymentModal')).hide();
+        showAlert('Payment recorded successfully!', 'success');
+        loadPayments();
+        loadDashboard();
+
+    } catch (error) {
+        document.getElementById('payment-modal-alert').innerHTML =
+            `<div class="alert alert-danger">${error.message}</div>`;
+    }
+}
+    
+    // Logout
+    function logout() {
+        clearAuth();
+        window.location.href = '../index.html';
+    }
+
+    // Load dashboard on page load
+    loadDashboard();
+</script>
+</body>
+</html>

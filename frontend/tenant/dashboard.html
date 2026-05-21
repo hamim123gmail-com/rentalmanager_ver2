@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenant Dashboard - RentManager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="d-flex">
+    <!-- SIDEBAR -->
+    <div class="sidebar d-flex flex-column" style="width:250px; min-width:250px;">
+        <div class="text-white text-center py-4 px-3 border-bottom border-secondary">
+            <h5 class="fw-bold mb-0"><i class="fas fa-building me-2"></i>RentManager</h5>
+            <small class="opacity-75">Tenant Portal</small>
+        </div>
+        <nav class="nav flex-column mt-3 flex-grow-1">
+            <a class="nav-link active" href="#" onclick="showSection('dashboard', event)">
+                <i class="fas fa-tachometer-alt"></i>Dashboard
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('payments', event)">
+                <i class="fas fa-money-bill"></i>Payment History
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('maintenance', event)">
+                <i class="fas fa-tools"></i>Maintenance
+            </a>
+            <a class="nav-link" href="#" onclick="showSection('profile', event)">
+                <i class="fas fa-user"></i>My Profile
+            </a>
+        </nav>
+        <div class="p-3">
+            <button class="btn btn-outline-light w-100 btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow-1">
+        <!-- TOP NAV -->
+        <nav class="navbar navbar-light bg-white border-bottom px-4">
+            <span class="navbar-brand mb-0 h5" id="page-title">Dashboard</span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted small">Welcome, <strong id="tenant-name"></strong></span>
+            </div>
+        </nav>
+
+        <div class="p-4">
+            <div id="alert-container"></div>
+
+            <!-- ===== DASHBOARD SECTION ===== -->
+            <div id="section-dashboard">
+                <div class="row g-4 mb-4">
+                    <!-- Rent Status Card -->
+                    <div class="col-md-4">
+                        <div class="stat-card blue">
+                            <h3 id="rent-amount">-</h3>
+                            <p><i class="fas fa-money-bill me-2"></i>Monthly Rent</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card green">
+                            <h3 id="due-date">-</h3>
+                            <p><i class="fas fa-calendar me-2"></i>Due Date (Day of Month)</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card orange" id="payment-status-card">
+                            <h3 id="payment-status">-</h3>
+                            <p><i class="fas fa-check-circle me-2"></i>Last Payment Status</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Info -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-home me-2"></i>My Property
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-muted">Address</td>
+                                            <td><strong id="prop-address">-</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">Unit</td>
+                                            <td><strong id="prop-unit">-</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">Lease Start</td>
+                                            <td><strong id="lease-start">-</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">Lease End</td>
+                                            <td><strong id="lease-end">-</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Landlord Info -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark text-white">
+                                <i class="fas fa-user-tie me-2"></i>Landlord Contact
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-muted">Name</td>
+                                            <td><strong id="owner-name">-</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">Email</td>
+                                            <td><strong id="owner-email">-</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">Phone</td>
+                                            <td><strong id="owner-phone">-</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAYMENTS SECTION ===== -->
+            <div id="section-payments" style="display:none;">
+                <h5 class="fw-bold mb-4">My Payment History</h5>
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Property</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Payment Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-table">
+                                    <tr><td colspan="5" class="text-center py-3">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MAINTENANCE SECTION ===== -->
+            <div id="section-maintenance" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold">Maintenance Requests</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#maintenanceModal">
+                        <i class="fas fa-plus me-2"></i>New Request
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Description</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Owner Notes</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="maintenance-table">
+                                    <tr><td colspan="6" class="text-center py-3">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PROFILE SECTION ===== -->
+            <div id="section-profile" style="display:none;">
+                <h5 class="fw-bold mb-4">My Profile</h5>
+                <div class="row g-4">
+                    <!-- Update Profile -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-user me-2"></i>Update Profile
+                            </div>
+                            <div class="card-body">
+                                <div id="profile-alert"></div>
+                                <div class="mb-3">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="profile-name">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control" id="profile-phone">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="text" class="form-control" id="profile-email" disabled>
+                                    <small class="text-muted">Email cannot be changed</small>
+                                </div>
+                                <button class="btn btn-primary" onclick="updateProfile()">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <i class="fas fa-lock me-2"></i>Change Password
+                            </div>
+                            <div class="card-body">
+                                <div id="password-alert"></div>
+                                <div class="mb-3">
+                                    <label class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="current-password">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="new-password">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm-password">
+                                </div>
+                                <button class="btn btn-dark" onclick="changePassword()">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MAINTENANCE MODAL -->
+<div class="modal fade" id="maintenanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Submit Maintenance Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="maint-modal-alert"></div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" id="maint-description" rows="4"
+                        placeholder="Describe the issue in detail..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Priority</label>
+                    <select class="form-control" id="maint-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitMaintenance()">
+                    Submit Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/api.js"></script>
+<script>
+    // Check auth
+    if (!requireAuth('tenant')) { window.location.href = '../login.html?role=tenant'; }
+
+    const user = getUser();
+    document.getElementById('tenant-name').textContent = user.name;
+
+    // Show/hide sections
+    function showSection(name, event) {
+        const sections = ['dashboard', 'payments', 'maintenance', 'profile'];
+        sections.forEach(s => {
+            document.getElementById('section-' + s).style.display = s === name ? 'block' : 'none';
+        });
+        document.getElementById('page-title').textContent =
+            name.charAt(0).toUpperCase() + name.slice(1);
+        document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+        if (event) event.target.closest('.nav-link').classList.add('active');
+
+        if (name === 'payments') loadPayments();
+        if (name === 'maintenance') loadMaintenance();
+        if (name === 'profile') loadProfile();
+    }
+
+    // Load dashboard
+    async function loadDashboard() {
+        try {
+            const data = await tenantAPI.getDashboard();
+            const a = data.assignment;
+            const p = data.latest_payment;
+
+            document.getElementById('rent-amount').textContent = formatCurrency(a.rent_amount);
+            document.getElementById('due-date').textContent = 'Day ' + a.due_date;
+            document.getElementById('prop-address').textContent = a.address;
+            document.getElementById('prop-unit').textContent = a.unit_number || 'N/A';
+            document.getElementById('lease-start').textContent = formatDate(a.lease_start);
+            document.getElementById('lease-end').textContent = formatDate(a.lease_end);
+            document.getElementById('owner-name').textContent = a.owner_name;
+            document.getElementById('owner-email').textContent = a.owner_email;
+            document.getElementById('owner-phone').textContent = a.owner_phone || 'N/A';
+
+            if (p) {
+                document.getElementById('payment-status').textContent = p.status.toUpperCase();
+                const card = document.getElementById('payment-status-card');
+                card.className = 'stat-card ' +
+                    (p.status === 'paid' ? 'green' : p.status === 'overdue' ? 'red' : 'orange');
+            } else {
+                document.getElementById('payment-status').textContent = 'No Payments';
+            }
+        } catch (error) {
+            showAlert('Error loading dashboard: ' + error.message, 'danger');
+        }
+    }
+
+    // Load payments
+    async function loadPayments() {
+        try {
+            const data = await tenantAPI.getPayments();
+            document.getElementById('payments-table').innerHTML = data.payments.map((p, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${p.address} ${p.unit_number}</td>
+                    <td>${formatCurrency(p.amount)}</td>
+                    <td><span class="badge bg-${getStatusBadge(p.status)}">${p.status}</span></td>
+                    <td>${formatDate(p.payment_date)}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="text-center">No payments yet</td></tr>';
+        } catch (error) {
+            showAlert('Error loading payments: ' + error.message, 'danger');
+        }
+    }
+
+    // Load maintenance
+    async function loadMaintenance() {
+        try {
+            const data = await tenantAPI.getMaintenance();
+            document.getElementById('maintenance-table').innerHTML = data.requests.map((r, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${r.description}</td>
+                    <td><span class="badge bg-${getStatusBadge(r.priority)}">${r.priority}</span></td>
+                    <td><span class="badge bg-${getStatusBadge(r.status)}">${r.status}</span></td>
+                    <td>${r.owner_notes || '<span class="text-muted">No notes yet</span>'}</td>
+                    <td>${formatDate(r.created_at)}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="text-center">No requests yet</td></tr>';
+        } catch (error) {
+            showAlert('Error loading maintenance: ' + error.message, 'danger');
+        }
+    }
+
+    // Load profile
+    async function loadProfile() {
+        try {
+            const data = await authAPI.profile();
+            document.getElementById('profile-name').value = data.user.name;
+            document.getElementById('profile-phone').value = data.user.phone || '';
+            document.getElementById('profile-email').value = data.user.email;
+        } catch (error) {
+            showAlert('Error loading profile: ' + error.message, 'danger');
+        }
+    }
+
+    // Submit maintenance
+    async function submitMaintenance() {
+        try {
+            const data = {
+                description: document.getElementById('maint-description').value,
+                priority: document.getElementById('maint-priority').value
+            };
+            if (!data.description) {
+                document.getElementById('maint-modal-alert').innerHTML =
+                    '<div class="alert alert-danger">Description is required</div>';
+                return;
+            }
+            await tenantAPI.submitMaintenance(data);
+            bootstrap.Modal.getInstance(document.getElementById('maintenanceModal')).hide();
+            showAlert('Maintenance request submitted successfully!', 'success');
+            document.getElementById('maint-description').value = '';
+            loadMaintenance();
+        } catch (error) {
+            document.getElementById('maint-modal-alert').innerHTML =
+                `<div class="alert alert-danger">${error.message}</div>`;
+        }
+    }
+
+    // Update profile
+    async function updateProfile() {
+        try {
+            const data = {
+                name: document.getElementById('profile-name').value,
+                phone: document.getElementById('profile-phone').value
+            };
+            await tenantAPI.updateProfile(data);
+            document.getElementById('profile-alert').innerHTML =
+                '<div class="alert alert-success">Profile updated successfully!</div>';
+            setTimeout(() => document.getElementById('profile-alert').innerHTML = '', 3000);
+        } catch (error) {
+            document.getElementById('profile-alert').innerHTML =
+                `<div class="alert alert-danger">${error.message}</div>`;
+        }
+    }
+
+    // Change password
+    async function changePassword() {
+        const current = document.getElementById('current-password').value;
+        const newPwd = document.getElementById('new-password').value;
+        const confirm = document.getElementById('confirm-password').value;
+
+        if (newPwd !== confirm) {
+            document.getElementById('password-alert').innerHTML =
+                '<div class="alert alert-danger">New passwords do not match</div>';
+            return;
+        }
+
+        try {
+            await tenantAPI.changePassword({
+                current_password: current,
+                new_password: newPwd
+            });
+            document.getElementById('password-alert').innerHTML =
+                '<div class="alert alert-success">Password changed successfully!</div>';
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        } catch (error) {
+            document.getElementById('password-alert').innerHTML =
+                `<div class="alert alert-danger">${error.message}</div>`;
+        }
+    }
+
+    // Logout
+    function logout() {
+        clearAuth();
+        window.location.href = '../index.html';
+    }
+
+    // Load dashboard on page load
+    loadDashboard();
+</script>
+</body>
+</html>
