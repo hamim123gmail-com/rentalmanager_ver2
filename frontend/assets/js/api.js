@@ -2,7 +2,7 @@
 // API HELPER - Connects Frontend to Backend
 // ============================================
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://rentalmanagerver2-production.up.railway.app/api';
 
 // Get token from localStorage
 const getToken = () => localStorage.getItem('token');
