@@ -28,10 +28,12 @@ app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
+
 // Error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong!' });
+    console.error('ERROR:', err.message);
+    console.error('STACK:', err.stack);
+    res.status(500).json({ message: err.message || 'Something went wrong!' });
 });
 
 const PORT = process.env.PORT || 5000;
